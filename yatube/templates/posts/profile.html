@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<head>  
+  <title>{{ title }}</title>
+</head>
+  <div class="container py-5">        
+    <h1>Все посты пользователя {{ author.get_full_name }} </h1>
+    <h3>Всего постов: {{ post_count }} </h3>
+    {% for post in page_obj %}
+      {% include 'includes/card_post.html' %}
+    {% endfor %}
+    {% include 'includes/paginator.html' %}
+  </div>
+{% endblock %}
