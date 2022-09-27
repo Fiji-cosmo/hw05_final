@@ -8,7 +8,7 @@ from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 
-from posts.models import Group, Post, User
+from posts.models import Group, Post, User, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -19,6 +19,8 @@ class PostPagesTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='ilya')
+        cls.follower_user = User.objects.create_user(username='fiji')
+        cls.not_follower = User.objects.create_user(username='not_follow')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -78,6 +80,10 @@ class PostPagesTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(PostPagesTests.user)
+        self.follower_client = Client()
+        self.follower_client.force_login(PostPagesTests.follower_user)
+        self.not_follower_client = Client()
+        self.not_follower_client.force_login(PostPagesTests.not_follower)
         cache.clear()
 
     def asserts(self, first_obj):
@@ -223,3 +229,40 @@ class PostPagesTests(TestCase):
         cache.clear()
         third_response = self.authorized_client.get(PostPagesTests.index_page)
         self.assertNotEqual(first_response.content, third_response.content)
+
+    def test_authorized_user_can_follow(self):
+        """Авторизованный пользователь может подписаться на автора
+        и отписаться."""
+        self.follower_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': PostPagesTests.user.username})
+        )
+        follow_count = Follow.objects.all().count()
+        self.assertEqual(follow_count, 1)
+        self.follower_client.get(reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': PostPagesTests.user.username})
+        )
+        unfollow_count = Follow.objects.all().count()
+        self.assertEqual(unfollow_count, 0)
+
+    def test_new_post_appears_in_the_subscribers(self):
+        """Новый пост появляется у подписчиков автора поста
+        и отсутвует у тех кто не подписан на автора."""
+        self.new_post = Post.objects.create(
+            group=PostPagesTests.group,
+            author=PostPagesTests.user,
+            text='Написал новый пост'
+        )
+        Follow.objects.create(
+            user=PostPagesTests.follower_user,
+            author=PostPagesTests.user
+        )
+        response = self.follower_client.get(reverse('posts:follow_index'))
+        self.assertEqual(
+            response.context['page_obj'][0].text, self.new_post.text
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertNotContains(
+            response, self.new_post.text
+        )
