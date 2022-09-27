@@ -1,15 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Авторы на которых вы подписаны{% endblock %}
 {% block content %}
-{% load cache %}
-{% include 'includes/switcher.html' %}
+  {% include 'includes/switcher.html' %}
   <div class="container py-5">     
-    <h1>{{ text }}</h1>
-    {% cache 20 index_page with page %}
+    <h1>Авторы на которых вы подписаны</h1>
     {% for post in page_obj %}
       {% include 'includes/card_post.html' %}
     {% endfor %}
-    {% endcache %}
     {% include 'includes/paginator.html' %}
   </div>  
 {% endblock %}
