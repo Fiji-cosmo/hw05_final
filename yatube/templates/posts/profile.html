@@ -21,8 +21,8 @@
     {% endif %}
   {% endif %}
     {% for post in page_obj %}
-      {% include 'includes/card_post.html' %}
+      {% include 'includes/card_post.html' with is_edit=True all_posts_author=False %}
     {% endfor %}
-    {% include 'includes/paginator.html' with is_edit=True all_posts_author=False %}
+    {% include 'includes/paginator.html' %}
 </div>
 {% endblock %}
