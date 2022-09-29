@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}YaTube{% endblock %}
 {% block content %}
 {% load cache %}
 {% include 'includes/switcher.html' %}
   <div class="container py-5">     
-    <h1>{{ text }}</h1>
+    <h1>Последние обновления на сайте</h1>
     {% cache 20 index_page with page %}
     {% for post in page_obj %}
-      {% include 'includes/card_post.html' %}
+      {% include 'includes/card_post.html' with is_edit=True all_posts_author=True %}
     {% endfor %}
     {% endcache %}
     {% include 'includes/paginator.html' %}

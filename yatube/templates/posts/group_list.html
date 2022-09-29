@@ -7,7 +7,7 @@
       {{ group.description }}
     </p>
     {% for post in page_obj %}
-      {% include 'includes/card_post.html' %}
+      {% include 'includes/card_post.html' with all_posts_author=True is_edit=False %}
     {% endfor %}
     {% include 'includes/paginator.html' %}
   </div>

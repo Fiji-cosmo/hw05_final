@@ -73,7 +73,8 @@ class PostFormTest(TestCase):
         )
 
     def test_post_edit_form(self):
-        """Валидная форма редактирует пост."""
+        """Валидная форма редактирует пост
+        а так же юзер может оставить коммент под постом."""
         comments_count = Comment.objects.count()
         post = Post.objects.create(
             group=PostFormTest.group,

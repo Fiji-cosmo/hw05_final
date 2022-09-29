@@ -1,10 +1,7 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Пост: {{ post.text|truncatechars:15 }}{% endblock %}
 {% block content %}
 {% load thumbnail %}
-<head>
-  <title>{{ title }}</title>
-</head>
 <div class="container py-5">
   <div class="row">
     <aside class="col-12 col-md-3">
@@ -21,10 +18,10 @@
           {% endif %}
         </li>
         <li class="list-group-item">
-          Автор: {{ author_post }}
+          Автор: {{ post.author }}
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          Всего постов автора:  <span> {{ post_count }}</span>
+          Всего постов автора: <span>{{ post.author.posts.count }}</span>
         </li>
         <li class="list-group-item">
           <a href="{% url 'posts:profile' post.author %}">

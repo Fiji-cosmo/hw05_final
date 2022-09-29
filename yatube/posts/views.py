@@ -5,49 +5,34 @@ from .forms import PostForm, CommentForm
 from .models import Post, Group, User, Follow
 from .utils import get_page_context
 
-TEXT_SLICE = 30
-
 
 def index(request):
-    template = 'posts/index.html'
     page_obj = get_page_context(
         Post.objects.select_related('author', 'group'), request
     )
-    is_edit = True
-    all_posts_author = True
     context = {
-        'title': 'YaTube',
-        'text': 'Последние обновления на сайте',
         'page_obj': page_obj,
-        'is_edit': is_edit,
-        'all_posts_author': all_posts_author,
     }
-    return render(request, template, context, )
+    return render(request, 'posts/index.html', context, )
 
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    template = 'posts/group_list.html'
     page_obj = get_page_context(
         group.posts.select_related('author', 'group'), request
     )
-    all_posts_author = True
     context = {
         'group': group,
-        'page_obj': page_obj,
-        'all_posts_author': all_posts_author,
+        'page_obj': page_obj
     }
-    return render(request, template, context)
+    return render(request, 'posts/group_list.html', context)
 
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    post_count = author.posts.all().count()
     page_obj = get_page_context(
         author.posts.select_related('author', 'group'), request
     )
-    is_edit = True
-    title = f'Профайл пользователя {username}'
     if request.user.is_authenticated:
         following = Follow.objects.filter(
             user=request.user, author=author
@@ -55,11 +40,8 @@ def profile(request, username):
     else:
         following = False
     context = {
-        'title': title,
         'author': author,
-        'post_count': post_count,
         'page_obj': page_obj,
-        'is_edit': is_edit,
         'following': following
     }
     return render(request, 'posts/profile.html', context)
@@ -67,21 +49,10 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    author_post = post.author
-    post_count = Post.objects.filter(author=author_post).count()
-    title = f'Пост {post.text[:TEXT_SLICE]}'
     form = CommentForm(request.POST or None)
     comments = post.comments.all()
-    if form.is_valid():
-        comments = form.save(commit=False)
-        comments.post = post
-        comments.save()
-        return redirect('posts:post_detail', post_id=post_id)
     context = {
         'post': post,
-        'post_count': post_count,
-        'title': title,
-        'author_post': author_post,
         'form': form,
         'comments': comments
     }
@@ -143,17 +114,14 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    # информация о текущем пользователе доступна в переменной request.user
     page_obj = get_page_context(
         Post.objects.filter(
-            author__following__user=request.user).select_related(
-                'author'
-        ), request
+            author__following__user=request.user
+        ).select_related('author'),
+        request
     )
-    is_edit = True
     context = {
         'page_obj': page_obj,
-        'is_edit': is_edit,
     }
     return render(request, 'posts/follow.html', context)
 

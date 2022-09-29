@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Профаил пользователя: {{ author }}{% endblock %}
 {% block content %}
 <head>  
-  <title>{{ title }}</title>
+  <title>Профаил пользователя: {{ author }}</title>
 </head>
 <div class="container py-5">
   <h1>Все посты пользователя {{ author.get_full_name }}</h1>
-  <h3>Всего постов: {{ posts_count }}</h3>
+  <h3>Всего постов: {{ author.posts.count }}</h3>
+  <h4>Всего подписчиков: {{ author.following.count }}</h4>
+  <h4>Всего подписок: {{ author.follower.count }}</h4>
   {% if user != author %}
     {% if following %}
       <a class="btn btn-lg btn-light" href="{% url 'posts:profile_unfollow' author.username %}" role="button">
@@ -21,6 +23,6 @@
     {% for post in page_obj %}
       {% include 'includes/card_post.html' %}
     {% endfor %}
-    {% include 'includes/paginator.html' %}
+    {% include 'includes/paginator.html' with is_edit=True all_posts_author=False %}
 </div>
 {% endblock %}

@@ -20,7 +20,6 @@ class PostPagesTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username='ilya')
         cls.follower_user = User.objects.create_user(username='fiji')
-        cls.not_follower = User.objects.create_user(username='not_follow')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -42,7 +41,8 @@ class PostPagesTests(TestCase):
         cls.post = Post.objects.create(
             group=cls.group,
             author=cls.user,
-            text='Тестовый пост'
+            text='Тестовый пост',
+            image=cls.uploaded
         )
         cls.index_page = reverse('posts:index')
         cls.group_list_page = reverse(
@@ -57,6 +57,9 @@ class PostPagesTests(TestCase):
         cls.post_create_page = reverse('posts:post_create')
         cls.post_edit_page = reverse(
             'posts:post_edit', kwargs={'post_id': cls.post.pk}
+        )
+        cls.post_add_comment = reverse(
+            'posts:add_comment', kwargs={'post_id': cls.post.pk}
         )
         cls.urls_list = [
             (cls.index_page, 'posts/index.html'),
@@ -82,8 +85,6 @@ class PostPagesTests(TestCase):
         self.authorized_client.force_login(PostPagesTests.user)
         self.follower_client = Client()
         self.follower_client.force_login(PostPagesTests.follower_user)
-        self.not_follower_client = Client()
-        self.not_follower_client.force_login(PostPagesTests.not_follower)
         cache.clear()
 
     def asserts(self, first_obj):
@@ -104,30 +105,18 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(PostPagesTests.index_page)
         first_obj = response.context['page_obj'][0]
         self.asserts(first_obj)
-        self.assertEqual(response.context['title'], 'YaTube')
-        self.assertEqual(response.context['is_edit'], True)
-        self.assertEqual(response.context['all_posts_author'], True)
 
     def test_profile_page_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.authorized_client.get(PostPagesTests.profile_page)
         first_obj = response.context['page_obj'][0]
         self.asserts(first_obj)
-        self.assertEqual(response.context['is_edit'], True)
-        self.assertEqual(
-            response.context['title'],
-            f'Профайл пользователя {PostPagesTests.user.username}'
-        )
-        self.assertEqual(
-            response.context['post_count'], PostPagesTests.post.pk
-        )
 
     def test_group_list_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.authorized_client.get(PostPagesTests.group_list_page)
         first_obj = response.context['page_obj'][0]
         self.asserts(first_obj)
-        self.assertEqual(response.context['all_posts_author'], True)
 
     def test_post_detail_page_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -141,16 +130,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(
             response.context['post'].comments, PostPagesTests.post.comments
         )
-        self.assertEqual(
-            response.context['title'], f'Пост {PostPagesTests.post}'
-        )
-        self.assertEqual(
-            response.context['author_post'], PostPagesTests.post.author
-        )
         self.assertEqual(response.context['post'], PostPagesTests.post)
-        self.assertEqual(
-            response.context['post_count'], PostPagesTests.post.pk
-        )
 
     def test_post_edit_page_show_correct_context(self):
         """
