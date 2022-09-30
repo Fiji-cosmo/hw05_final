@@ -10,10 +10,7 @@ def index(request):
     page_obj = get_page_context(
         Post.objects.select_related('author', 'group'), request
     )
-    context = {
-        'page_obj': page_obj,
-    }
-    return render(request, 'posts/index.html', context, )
+    return render(request, 'posts/index.html', context={'page_obj': page_obj})
 
 
 def group_posts(request, slug):
@@ -33,12 +30,10 @@ def profile(request, username):
     page_obj = get_page_context(
         author.posts.select_related('author', 'group'), request
     )
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(
-            user=request.user, author=author
-        ).exists()
-    else:
-        following = False
+    following = (
+        request.user.is_authenticated
+        and Follow.objects.filter(user=request.user, author=author).exists()
+    )
     context = {
         'author': author,
         'page_obj': page_obj,

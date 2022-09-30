@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Авторы на которых вы подписаны{% endblock %}
 {% block content %}
-  {% include 'includes/switcher.html' %}
+  {% include 'includes/switcher.html' with follow=True %}
   <div class="container py-5">     
     <h1>Авторы на которых вы подписаны</h1>
     {% for post in page_obj %}

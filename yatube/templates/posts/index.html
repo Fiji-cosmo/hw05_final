@@ -2,7 +2,7 @@
 {% block title %}YaTube{% endblock %}
 {% block content %}
 {% load cache %}
-{% include 'includes/switcher.html' %}
+{% include 'includes/switcher.html' with index=True %}
   <div class="container py-5">     
     <h1>Последние обновления на сайте</h1>
     {% cache 20 index_page with page %}
