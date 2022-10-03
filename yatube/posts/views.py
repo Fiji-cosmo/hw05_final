@@ -115,10 +115,7 @@ def follow_index(request):
         ).select_related('author'),
         request
     )
-    context = {
-        'page_obj': page_obj,
-    }
-    return render(request, 'posts/follow.html', context)
+    return render(request, 'posts/follow.html', context={'page_obj': page_obj})
 
 
 @login_required
